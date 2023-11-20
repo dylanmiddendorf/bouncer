@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<!-- Copyright 2023 Dylan Middendorf -->
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8" name="viewport" content="width=device-width">
+
+    <style>
+        div {
+            color: #202020;
+            font-family: arial, helvetica, sans-serif;
+            margin: auto;
+        }
+
+        img.logotype {
+            display: block;
+            margin: auto;
+            max-height: 90px;
+            max-width: 90px;
+        }
+
+        a {
+            color: #037aee;
+            text-decoration: none;
+        }
+
+        .header {
+            color: #313131;
+            font-size: 26px;
+            letter-spacing: 2px;
+            line-height: 50px;
+            text-align: center;
+
+            /* Don't allow for rendering optimizations */
+            max-width: 500px;
+        }
+
+        .message {
+            background-color: #fff;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            line-height: 134%;
+            padding: 50px;
+            width: 90%;
+
+            /* Don't allow for rendering optimizations */
+            max-width: 500px;
+        }
+
+        .footnote {
+            font-size: 10px;
+            line-height: 12px;
+            text-align: center;
+
+            /* Don't allow for rendering optimizations */
+            max-width: 500px;
+        }
+    </style>
+</head>
+
+<body style="background-color: #f1f1f1;margin: 0px">
+    <br style="line-height: 50px"> <!-- Provide a small margin above the logotype -->
+    <img class="logotype" src="https://miamicyber.org/static/logo.png">
+
+
+    <div class="header">
+        Verification Code<br>
+        $code
+    </div><br style="line-height: 40px">
+
+    <div class="message">
+        Hello $username,<br>
+        <br>
+        As part of our security measures, we have implemented a verification system for our Discord server. To verify
+        your account, simply enter the verification code with <code>[verification command]</code>. After verification will
+        you will recive access to the server and help maintain a safe and welcoming community.<br>
+        <br>
+        If this wasn't you, please <a href="mailto:mucsc+report@miamioh.edu">report this incident</a>.<br>
+        <br>
+        Thank you,<br>
+        MUCSC
+    </div><br style="line-height: 50px">
+
+    <div class="footnote" style="font-weight: bold">
+        Need Help? <a href="mailto:mucsc+help@miamioh.edu">mucsc@miamioh.edu</a>
+    </div><br style="line-height: 30px">
+</body>
+
+</html>
