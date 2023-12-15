@@ -22,29 +22,27 @@ from discord.app_commands import Command, Group, command
 
 class Module:
     @property
-    def commands(self):
-        def iscommand(method):
-            # type: (tuple[str, MethodType]) -> bool
+    def commands(self) -> list[Command | Group]:
+        def iscommand(method: tuple[str, MethodType]) -> bool:
             """Return true if the method is a application command."""
             return method[0] not in whitelist and method[0][0] != '_'
-        whitelist = getmembers(Module, ismethod)  # List of inherited methods
-
+        whitelist = getmembers(Module, ismethod)
         def addcommand(command_tree, name, callback):
             # type: (dict[str, dict | str], str, MethodType) -> None
             """Adds an application command to the tree."""
+
             for key in name[:-1]:
                 command_tree = command_tree.setdefault(key, {})
                 assert isinstance(command_tree, dict)
             command_tree[name[-1]] = callback
 
-        def buildcommand(name, callback):
-            # type: (str, dict | MethodType) -> Command | Group
+        def buildcommand(name: str, callback: dict | MethodType) -> Command | Group:
             """Constructs an applicaion command from a command tree"""
             if isinstance(callback, MethodType):
-                description = callback.__doc__  # Obtain description from docstring
-                return command(name=name, description=description)(callback)
+                print('Command name: ' + name)
+                return command(name=name, description=callback.__doc__)(callback.__call__)
             elif isinstance(callback, dict):
-                command_group = Group(name=name)  # Initalize command group
+                command_group = Group(name=name, description='Unkown')
                 for c in callback.items():
                     command_group.add_command(buildcommand(*c))
                 return command_group
@@ -52,8 +50,9 @@ class Module:
 
         command_tree: dict[str, dict | MethodType] = {}  # Store commands
         for name, callback in filter(iscommand, getmembers(self, ismethod)):
-            addcommand(command_tree, name, callback)  # Construct command tree
-        return [buildcommand(*c) for c in command_tree.items()]
+            print(name, end=',')
+            addcommand(command_tree, name.split('_'), callback)  # Construct command tree
+        return [buildcommand(n, c) for n, c in command_tree.items()]
 
 
 class ModuleLoader:
