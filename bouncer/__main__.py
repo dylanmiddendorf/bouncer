@@ -19,9 +19,10 @@ from discord import Intents
 from discord.ext.commands.bot import Bot
 from core.config import Configuration
 from core.gmail import Gmail
-from modules.verification import Verificiation
+from modules.verification import Verification
 
 DEFAULT_CONFIG_FILE = os.path.join('templates', 'configuration.json')
+
 
 def main():
     parser = ArgumentParser()  # Quickly parse arguments (if any)
@@ -30,7 +31,7 @@ def main():
     args = parser.parse_args()
     config = Configuration(args.config)
 
-    # Load and deserialize relevent credentials
+    # Load and deserialize relevant credentials
     client_id = os.getenv('GOOGLE_CLIENT_ID')
     client_secret = os.getenv('GOOGLE_CLIENT_SECRET')
     refresh_token = os.getenv('GOOGLE_REFRESH_TOKEN')
@@ -43,7 +44,7 @@ def main():
 
     # Start the discord client
     bouncer = Bot('!', intents=Intents.all())
-    asyncio.run(bouncer.add_cog(Verificiation(config, gmail_client)))
+    asyncio.run(bouncer.add_cog(Verification(config, gmail_client)))
 
     @bouncer.event
     async def on_ready():

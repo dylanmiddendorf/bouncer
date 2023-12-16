@@ -24,15 +24,14 @@ from typing import Optional
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
 
-class Gmail():
+class Gmail:
     def __init__(self, client_id: str, client_secret: str, refresh_token: Optional[str] = None) -> None:
         if not refresh_token:
             serialized_credentials = (client_id, client_secret)
             self._creds = get_user_credentials(SCOPES, *serialized_credentials)
         else:
             # Create minimal client information for credential authentication
-            info = {'client_id': client_id, 'client_secret': client_secret}
-            info['refresh_token'] = refresh_token
+            info = {'client_id': client_id, 'client_secret': client_secret, 'refresh_token': refresh_token}
 
             # Obtain Google OAuth2 Session Credentials
             self._creds = Credentials.from_authorized_user_info(info, SCOPES)
@@ -53,5 +52,5 @@ class Gmail():
             request = service.users().messages().send(userId="me", body=enc_msg)
             return request.execute()
         except HttpError as err:
-            print(f'An error occured: {err}')
+            print(f'An error occurred: {err}')
             return None

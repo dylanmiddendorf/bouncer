@@ -28,7 +28,7 @@ class Singleton(type):
         ```py
         SingletonImpl = type('SingletonImpl', (Singleton), {})
         s, p = SingletonImpl(), SingletonImpl()
-        assert s == p # Ensure all instances are syncronized
+        assert s == p # Ensure all instances are synchronized
         ```
     See Also:
         https://stackoverflow.com/a/6798042

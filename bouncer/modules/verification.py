@@ -28,8 +28,8 @@ from discord.ext.commands.cog import GroupCog
 from discord.ui import View, Button, Modal, TextInput
 from discord.utils import MISSING
 
-from core.config import Configuration
-from core.gmail import Gmail
+from ..core.config import Configuration
+from ..core.gmail import Gmail
 
 
 VERIFICIATION_MESSAGE = '''**Welcome to Our Server! 🎉**
@@ -41,7 +41,7 @@ If you have any questions or need assistance, feel free to reach out to our mode
 Enjoy your time here! 🌟'''
 
 
-class AuthenticationCode():
+class AuthenticationCode:
     def __init__(self, code: int, max_attempts: int, timeout: int) -> None:
         self._code = code
         self._expires = time.time() + timeout
@@ -60,8 +60,8 @@ class AuthenticationCode():
 
 
 class SendEmailModal(Modal, title='Email Registration'):
-    def __init__(self, verification: Verificiation) -> None:
-        super().__init__()  # Continue with modal initalization
+    def __init__(self, verification: Verification) -> None:
+        super().__init__()  # Continue with modal initialization
         self.verification = verification
 
     answer = TextInput(label='What is your university email address?')
@@ -83,7 +83,7 @@ class SendEmailModal(Modal, title='Email Registration'):
         if len(self.verification.codes) > int(self.verification.config['bandwidth']):
             return await response.send_message('Max verification codes reached, please try again in a few minutes.')
 
-        # Gather relevent information needed within the email
+        # Gather relevant information needed within the email
         code = secrets.randbelow(1_000_000)
 
         # Build the email's body from verification template
@@ -108,8 +108,8 @@ class SendEmailModal(Modal, title='Email Registration'):
 class VerifyCodeModal(Modal, title='Code Verification'):
     answer = TextInput(label='What is the code provided within the email?')
 
-    def __init__(self, verification: Verificiation) -> None:
-        super().__init__()  # Continue with modal initalization
+    def __init__(self, verification: Verification) -> None:
+        super().__init__()  # Continue with modal initialization
         self.verification = verification
 
     async def on_submit(self, interaction: Interaction) -> None:
@@ -130,7 +130,7 @@ class VerifyCodeModal(Modal, title='Code Verification'):
         await response.send_message('User has been authenticated!')
 
 
-class Verificiation(GroupCog, group_name='verification'):
+class Verification(GroupCog, group_name='verification'):
     def __init__(self, config: Configuration, gmail: Gmail) -> None:
         self.gmail = gmail
         self.codes: dict[int, tuple[AuthenticationCode, str]] = {}
@@ -172,7 +172,7 @@ class Verificiation(GroupCog, group_name='verification'):
     def _garbage_collector(self, user_id: int, ttl: float):
         """Removes the user id from active codes after the specified ttl."""
         # Delete thread if code has been removed
-        time.sleep(ttl + 0.25)  # Sleep until after code experation
+        time.sleep(ttl + 0.25)  # Sleep until after code expiration
         if user_id in self.codes:
             code = self.codes[user_id][0]
             if code.is_expired():

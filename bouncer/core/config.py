@@ -17,28 +17,26 @@ from __future__ import annotations
 import json
 from io import TextIOWrapper
 from typing import Optional
-from util.singleton import Singleton
-from util.decorators import static_property
-
+from ..util.singleton import Singleton
 
 class Configuration(metaclass=Singleton):
     _instance: Configuration = None
 
     def __init__(self, config: TextIOWrapper) -> None:
-        self._instance = self # Cache for improved performance
+        self._instance = self  # Cache for improved performance
         self._name, self._data = config.name, json.load(config)
 
     def __getitem__(self, key):
         return self._data[key]
 
-    @static_property
+    @staticmethod
     def instance(config: Optional[TextIOWrapper] = None) -> Configuration:
         inst = Configuration._instance  # increase readability
 
-        if inst is None:  # Ensure configuration has been initalized
+        if inst is None:  # Ensure configuration has been initialized
             inst = Configuration(config)  # Generate singleton instance
         return inst
-    
+
     @property
     def name(self) -> str:
         return self._name
