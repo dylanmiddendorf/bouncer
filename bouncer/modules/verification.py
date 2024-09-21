@@ -28,17 +28,17 @@ from discord.ext.commands.cog import GroupCog
 from discord.ui import View, Button, Modal, TextInput
 from discord.utils import MISSING
 
-from ..core.config import Configuration
-from ..core.gmail import Gmail
+from core.config import Configuration
+from core.gmail import Gmail
 
 
-VERIFICIATION_MESSAGE = '''**Welcome to Our Server! 🎉**
+VERIFICIATION_MESSAGE = """**Welcome to Our Server! 🎉**
 
 To get started and ensure a safe community, please verify your email through the buttons below.
 Once you've verified your email, you'll be all set to explore and engage with our awesome community.
 If you have any questions or need assistance, feel free to reach out to our moderators.
 
-Enjoy your time here! 🌟'''
+Enjoy your time here! 🌟"""
 
 
 class AuthenticationCode:
@@ -59,12 +59,12 @@ class AuthenticationCode:
         return False if self.is_expired() else code == self._code
 
 
-class SendEmailModal(Modal, title='Email Registration'):
+class SendEmailModal(Modal, title="Email Registration"):
     def __init__(self, verification: Verification) -> None:
         super().__init__()  # Continue with modal initialization
         self.verification = verification
 
-    answer = TextInput(label='What is your university email address?')
+    answer = TextInput(label="What is your university email address?")
 
     async def on_submit(self, interaction: Interaction) -> None:
         email = str(self.answer)
@@ -72,41 +72,44 @@ class SendEmailModal(Modal, title='Email Registration'):
 
         for role in user.roles:
             if role.id in self.verification.roles.values():
-                return await response.send_message('You are already authenticated.')
-        if re.fullmatch(r'(?i)[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}', email) is None:
-            return await response.send_message('Please enter a valid email address.')
+                return await response.send_message("You are already authenticated.")
+        if re.fullmatch(r"(?i)[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", email) is None:
+            return await response.send_message("Please enter a valid email address.")
 
-        domain = email.split('@')[1]
+        domain = email.split("@")[1]
         if not domain in self.verification.roles:
-            return await response.send_message('Email domain is not recognized.')
+            return await response.send_message("Email domain is not recognized.")
 
-        if len(self.verification.codes) > int(self.verification.config['bandwidth']):
-            return await response.send_message('Max verification codes reached, please try again in a few minutes.')
+        if len(self.verification.codes) > int(self.verification.config["bandwidth"]):
+            return await response.send_message(
+                "Max verification codes reached, please try again in a few minutes."
+            )
 
         # Gather relevant information needed within the email
         code = secrets.randbelow(1_000_000)
 
         # Build the email's body from verification template
         body = string.Template(self.verification.verification_template)
-        body = body.substitute(code=('%06d' % code), username=user.name)
+        body = body.substitute(code=("%06d" % code), username=user.name)
 
         # Construct the verification email
-        msg = MIMEText(body, 'html')
-        msg['To'], msg['Subject'] = email, 'Discord Verification Code'
+        msg = MIMEText(body, "html")
+        msg["To"], msg["Subject"] = email, "Discord Verification Code"
         self.verification.gmail.send_message(msg)
 
-        gc_args = (user.id, self.verification.config['timeout'])
+        gc_args = (user.id, self.verification.config["timeout"])
         Thread(target=self.verification._garbage_collector, args=gc_args).start()
 
-        attempts = self.verification.config['attempts']
+        attempts = self.verification.config["attempts"]
         authentication_code = AuthenticationCode(
-            code, attempts, self.verification.timeout)
+            code, attempts, self.verification.timeout
+        )
         self.verification.codes[user.id] = (authentication_code, domain)
-        await response.send_message('Verification email has been sent!', ephemeral=True)
+        await response.send_message("Verification email has been sent!", ephemeral=True)
 
 
-class VerifyCodeModal(Modal, title='Code Verification'):
-    answer = TextInput(label='What is the code provided within the email?')
+class VerifyCodeModal(Modal, title="Code Verification"):
+    answer = TextInput(label="What is the code provided within the email?")
 
     def __init__(self, verification: Verification) -> None:
         super().__init__()  # Continue with modal initialization
@@ -116,51 +119,53 @@ class VerifyCodeModal(Modal, title='Code Verification'):
         user, response = interaction.user, interaction.response
 
         if user.id not in self.verification.codes:
-            return await response.send_message('Please use /verify first.')
+            return await response.send_message("Please use /verify first.")
 
         role = self.verification.roles[self.verification.codes[user.id][1]]
         if not self.verification.codes[user.id][0].validate(int(str(self.answer))):
             if self.verification.codes[user.id][0].is_expired():
                 del self.verification.codes[user.id]
-            msg = 'An invalid code has been detected, please try `/verify email` again.'
+            msg = "An invalid code has been detected, please try `/verify email` again."
             return await response.send_message(msg)
 
         del self.verification.codes[user.id]
         await user.add_roles(interaction.guild.get_role(role))
-        await response.send_message('User has been authenticated!')
+        await response.send_message("User has been authenticated!")
 
 
-class Verification(GroupCog, group_name='verification'):
+class Verification(GroupCog, group_name="verification"):
     def __init__(self, config: Configuration, gmail: Gmail) -> None:
         self.gmail = gmail
         self.codes: dict[int, tuple[AuthenticationCode, str]] = {}
 
-        self.config = config['authentication']
-        self.bandwidth = self.config['bandwidth']
-        self.timeout = self.config['timeout']
+        self.config = config["authentication"]
+        self.bandwidth = self.config["bandwidth"]
+        self.timeout = self.config["timeout"]
 
-        template_path = self.config['template']
-        with open(template_path, 'rt', encoding='utf-8') as template_file:
+        template_path = self.config["template"]
+        with open(template_path, "rt", encoding="utf-8") as template_file:
             self.verification_template = template_file.read()
 
-        self.roles = self.config['role_associations']
+        self.roles = self.config["role_associations"]
 
-    @command(name='create')
-    async def verification_create(self, interaction: Interaction, channel: TextChannel) -> None:
+    @command(name="create")
+    async def verification_create(
+        self, interaction: Interaction, channel: TextChannel
+    ) -> None:
         """Creates new verification system."""
         # Used to construct `send email` & `verify code`
         view = View(timeout=None)
-        send_email = Button(label='Send Email', emoji='📧')
+        send_email = Button(label="Send Email", emoji="📧")
         send_email.callback = self._send_email
         view.add_item(send_email)
 
-        verify_code = Button(label='Verify Code', emoji='✅')
+        verify_code = Button(label="Verify Code", emoji="✅")
         verify_code.callback = self._verify_code
         view.add_item(verify_code)
         await channel.send(VERIFICIATION_MESSAGE, view=view)
 
         # Provide the user with a generic response
-        response = f'Verification system has been created in <#{channel.id}>'
+        response = f"Verification system has been created in <#{channel.id}>"
         await interaction.response.send_message(response)
 
     async def _send_email(self, interaction: Interaction) -> None:

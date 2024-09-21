@@ -21,17 +21,23 @@ from googleapiclient.discovery import build, Resource
 from googleapiclient.errors import HttpError
 from typing import Optional
 
-SCOPES = ['https://www.googleapis.com/auth/gmail.send']
+SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
 
 
 class Gmail:
-    def __init__(self, client_id: str, client_secret: str, refresh_token: Optional[str] = None) -> None:
+    def __init__(
+        self, client_id: str, client_secret: str, refresh_token: Optional[str] = None
+    ) -> None:
         if not refresh_token:
             serialized_credentials = (client_id, client_secret)
             self._creds = get_user_credentials(SCOPES, *serialized_credentials)
         else:
             # Create minimal client information for credential authentication
-            info = {'client_id': client_id, 'client_secret': client_secret, 'refresh_token': refresh_token}
+            info = {
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "refresh_token": refresh_token,
+            }
 
             # Obtain Google OAuth2 Session Credentials
             self._creds = Credentials.from_authorized_user_info(info, SCOPES)
@@ -45,12 +51,12 @@ class Gmail:
     def send_message(self, message: Message):
         """Send the specified message utilizing the active credentials."""
         try:
-            enc_msg = {'raw': urlsafe_b64encode(message.as_bytes()).decode()}
-            service: Resource = build('gmail', 'v1', credentials=self._creds)
+            enc_msg = {"raw": urlsafe_b64encode(message.as_bytes()).decode()}
+            service: Resource = build("gmail", "v1", credentials=self._creds)
 
             # pylint: disable=E1101
             request = service.users().messages().send(userId="me", body=enc_msg)
             return request.execute()
         except HttpError as err:
-            print(f'An error occurred: {err}')
+            print(f"An error occurred: {err}")
             return None

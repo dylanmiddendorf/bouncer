@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 # Copyright 2023 Dylan Middendorf
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,37 +23,46 @@ from core.config import Configuration
 from core.gmail import Gmail
 from modules.verification import Verification
 
-DEFAULT_CONFIG_FILE = os.path.join('templates', 'configuration.json')
+DEFAULT_CONFIG_FILE = os.path.join("templates", "configuration.json")
 
 
 def main():
     parser = ArgumentParser()  # Quickly parse arguments (if any)
-    parser.add_argument('--config', nargs='?', default=DEFAULT_CONFIG_FILE,
-                        type=FileType('r'), help='Configuration file path')
+    parser.add_argument("--debug", action="store_true")
+    parser.add_argument(
+        "--configuration",
+        nargs="?",
+        default=DEFAULT_CONFIG_FILE,
+        type=FileType("r"),
+        help="Configuration file path",
+    )
+
     args = parser.parse_args()
-    config = Configuration(args.config)
+    config = Configuration(args.configuration)
 
     # Load and deserialize relevant credentials
-    client_id = os.getenv('GOOGLE_CLIENT_ID')
-    client_secret = os.getenv('GOOGLE_CLIENT_SECRET')
-    refresh_token = os.getenv('GOOGLE_REFRESH_TOKEN')
+    client_id = os.getenv("GOOGLE_CLIENT_ID")
+    client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+    refresh_token = os.getenv("GOOGLE_REFRESH_TOKEN")
     gmail_client = Gmail(client_id, client_secret, refresh_token)
 
     # Update the cache the refresh token (for future use)
     if not refresh_token:
         refresh_token = gmail_client.credentials.refresh_token
-        os.environ['GOOGLE_REFRESH_TOKEN'] = refresh_token
+        os.environ["GOOGLE_REFRESH_TOKEN"] = refresh_token
+        if args.debug:
+            print(f"Refresh Token: {gmail_client.credentials.refresh_token}")
 
     # Start the discord client
-    bouncer = Bot('!', intents=Intents.all())
+    bouncer = Bot("!", intents=Intents.all())
     asyncio.run(bouncer.add_cog(Verification(config, gmail_client)))
 
     @bouncer.event
     async def on_ready():
         await bouncer.tree.sync()
 
-    bouncer.run(os.getenv('DISCORD_TOKEN'))
+    bouncer.run(os.getenv("DISCORD_TOKEN"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

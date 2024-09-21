@@ -17,7 +17,8 @@ from __future__ import annotations
 import json
 from io import TextIOWrapper
 from typing import Optional
-from ..util.singleton import Singleton
+from util.singleton import Singleton
+
 
 class Configuration(metaclass=Singleton):
     _instance: Configuration = None
@@ -45,5 +46,5 @@ class Configuration(metaclass=Singleton):
     def save(filename: Optional[str] = None) -> None:
         inst = Configuration._instance  # increase readability
         filename = inst.name if filename is None else filename
-        with open(filename, 'wt') as config:
+        with open(filename, "wt") as config:
             json.dump(config, inst._data, indent=2)
