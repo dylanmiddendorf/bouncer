@@ -72,17 +72,17 @@ class SendEmailModal(Modal, title="Email Registration"):
 
         for role in user.roles:
             if role.id in self.verification.roles.values():
-                return await response.send_message("You are already authenticated.")
+                return await response.send_message("You are already authenticated.", ephemeral=True)
         if re.fullmatch(r"(?i)[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", email) is None:
-            return await response.send_message("Please enter a valid email address.")
+            return await response.send_message("Please enter a valid email address.", ephemeral=True)
 
         domain = email.split("@")[1]
         if not domain in self.verification.roles:
-            return await response.send_message("Email domain is not recognized.")
+            return await response.send_message("Email domain is not recognized.", ephemeral=True)
 
         if len(self.verification.codes) > int(self.verification.config["bandwidth"]):
             return await response.send_message(
-                "Max verification codes reached, please try again in a few minutes."
+                "Max verification codes reached, please try again in a few minutes.", ephemeral=True
             )
 
         # Gather relevant information needed within the email
@@ -119,18 +119,18 @@ class VerifyCodeModal(Modal, title="Code Verification"):
         user, response = interaction.user, interaction.response
 
         if user.id not in self.verification.codes:
-            return await response.send_message("Please use /verify first.")
+            return await response.send_message("Please enter your email first.", ephemeral=True)
 
         role = self.verification.roles[self.verification.codes[user.id][1]]
         if not self.verification.codes[user.id][0].validate(int(str(self.answer))):
             if self.verification.codes[user.id][0].is_expired():
                 del self.verification.codes[user.id]
-            msg = "An invalid code has been detected, please try `/verify email` again."
-            return await response.send_message(msg)
+            msg = "An invalid code has been detected, please try again."
+            return await response.send_message(msg, ephemeral=True)
 
         del self.verification.codes[user.id]
         await user.add_roles(interaction.guild.get_role(role))
-        await response.send_message("User has been authenticated!")
+        await response.send_message("User has been authenticated!", ephemeral=True)
 
 
 class Verification(GroupCog, group_name="verification"):
