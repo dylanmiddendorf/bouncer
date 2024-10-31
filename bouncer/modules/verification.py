@@ -34,9 +34,11 @@ from core.gmail import Gmail
 
 VERIFICIATION_MESSAGE = """**Welcome to Our Server! 🎉**
 
-To get started and ensure a safe community, please verify your email through the buttons below.
+To get started and ensure a safe community, please verify your **university email** through the buttons below.
 Once you've verified your email, you'll be all set to explore and engage with our awesome community.
 If you have any questions or need assistance, feel free to reach out to our moderators.
+
+**Miami University Students: <uniqueid>@miamioh.edu**
 
 Enjoy your time here! 🌟"""
 
